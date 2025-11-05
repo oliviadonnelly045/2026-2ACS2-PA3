@@ -46,7 +46,7 @@ def add_event(schedule): #function to add an event to the schedule
     elif schedule_add == "saturday":
         schedule_sat = input("Enter the event you want to add on Saturday ").lower()
         schedule ["Saturday"] = schedule_sat
-    return 
+    return schedule
 
 def remove_event(schedule): #function to drop an event in the schedule
     schedule_remove = input("What day would you like to remove from? (Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday)").lower()
@@ -71,17 +71,24 @@ def remove_event(schedule): #function to drop an event in the schedule
     return schedule
 
 def show_schedule():
-    f = open("full_schedule.txt")
-    for line in f:
-        print(line)
-        time.sleep(0.2)
-    f.close()
+    try:
+        with open("full_schedule.txt", "r") as f:
+            print("\nYour Schedule:\n-----------------")
+            for line in f:
+                print(line.strip())
+                time.sleep(0.2)
+    except FileNotFoundError:
+        print("No schedule file found yet")
+        
 
-def add_schedule(new_schedule):
-    newline = (full_schedule)
-    f = open("full_schedule.txt", "a")
-    f.write(newline)
-    f.close()
+def add_schedule():
+    days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    with open("full_schedule.txt", "w") as f:
+        for i, day_dict in enumerate(full_schedule):
+            if days[i] in day_dict and day_dict[days[i]]:
+                f.write(f"{days[i]}: {day_dict[days[i]]}\n")
+            else:
+                f.write(f"{days[i]}: (no events\n")
 
 
 #main function
@@ -95,7 +102,13 @@ def main():
         valid_actions = ["edit", "view", "exit"]
         while user_option not in valid_actions:
             print("Error. Please pick edit, view, or exit.")
-        if user_option == "edit":
+            user_option = input("What would you like to do? (edit, view, or exit) ").lower()
+        if user_option == "exit":
+            add_schedule()
+            dontstop = False
+            show_schedule()
+            break
+        elif user_option == "edit":
             edit_choice = input("What would you like to do? (add or remove) ").lower()
             valid_actions = ["add", "remove"]
             while edit_choice not in valid_actions:
@@ -107,15 +120,25 @@ def main():
             elif edit_choice == "remove":
                 user_schedule = remove_event(user_schedule)
 
+            for day_dict in full_schedule:
+                day_dict.update(user_schedule)
+            
+            add_schedule()
+    
+
+
         elif user_option == "view":
             show_schedule()
-        elif user_option == "exit":
+        
+
 
         ask = input("Would you like to keep going? (yes/no) ")
         valid_actions = ["yes", "y", "no", "n"]
         if ask == "no":
+            add_schedule()
             dontstop = False
             show_schedule()
                     
+            
 
 main()
