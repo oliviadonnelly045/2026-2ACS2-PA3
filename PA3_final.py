@@ -3,6 +3,29 @@ DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satur
 schedule = {day: [] for day in DAYS}
 
 
+
+
+def load_schedule(filename="full_schedule.txt"): #load all saved events from file
+    try:
+        with open(filename, "r") as f:
+            current_day = None #keeps track of current day being read
+            for line in f:
+                line = line.rstrip("\n")
+                if line.endswith(":"): #if the line has a colon in it (the titles of the days do)
+                    day_name = line[:-1] #remove colon
+                    if day_name in DAYS: #check if it is a valid day
+                        current_day = day_name #mark this as current day
+                    else:
+                        current_day = None
+                    continue
+                
+                if current_day: #read events if inside of a valid day
+                    if line.startswith(" - "):
+                        schedule[current_day].append(line[3:])
+    except FileNotFoundError:
+        pass
+
+
 def add_schedule(filename="full_schedule.txt"): #save the entire schedule
     with open(filename, "w") as f:
         for day in DAYS:
@@ -12,6 +35,8 @@ def add_schedule(filename="full_schedule.txt"): #save the entire schedule
                     f.write(" - " + item + "\n")
             else: #if no events exist for that day
                 f.write(" (no events)\n")
+            f.write("\n")
+    f.close()
 
 def add_event(): #add one event to a chosen day
     day = input("What day would you like to add to? (Sunday-Saturday) ").strip().title() #ask user which day to add the event to
@@ -22,15 +47,14 @@ def add_event(): #add one event to a chosen day
     time_str = input("Enter the time: ").strip() #have user enter a time
     event = input("Enter the event name: ").strip() #have user enter the event name
 
-    for d in DAYS: #event can only occur once per day
-        for e in schedule[d]:
-            if event.lower() in e.lower(): #checks for event duplication
-                print(f"That event already exits on {d}. Each event can only be on one day.")
-                return #stop function if the event already exists
+    for e in schedule[day]: #event can only occur once per day
+        if event.lower() in e.lower(): #checks for event duplication
+            print(f"That event already exits on {day}. Each event can only be on one day.")
+            return #stop function if the event already exists
             
     if event: #add to schedule if event name is not empty
-        new = f"{time_str} - {event}" #combines the time and event name into one string
-        schedule[day].append(f"{time_str} - {event}") #append the new event to that day's list
+        new = f"{time_str} - {event}" if time_str else event#combines the time and event name into one string
+        schedule[day].append(new)
         add_schedule()
     else:
         print("No event entered.")
@@ -67,19 +91,18 @@ def remove_event(): #function to drop all events from a day in the schedule
   
 def show_schedule(): #print current schedule
     print("\nYour Schedule:\n-----------------")
-    for day in DAYS:
-        print(day + ":") #print all stored event for the day
-        if schedule[day]: #if the list is not empty
-            for item in schedule[day]:
-                print(" - " + item)
-        else:
-            print(" (No events)")
-    print("")
+    try:
+        with open("full_schedule.txt", "r") as txt: #open the file to read
+            print(txt.read()) #print full saved schedule from .txt file
+    except FileNotFoundError:
+        print("(No schedule saved yet.)")
+    print("---------------\n")
 
 
 #main function
 def main():
     print("Welcome to your weekly schedule planner!")
+    load_schedule()
     dontstop = True #keep running until user chooses to exit
     while dontstop:
         user_option = input("What would you like to do? (add, remove, view, or exit) ").strip().lower() #ask user what they want to do

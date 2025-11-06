@@ -1,14 +1,22 @@
 Sunday:
- - 9 - swim
-Monday:
  (no events)
+
+Monday:
+ - 9 - running
+ - 9 - soccer
+
 Tuesday:
  (no events)
+
 Wednesday:
- (no events)
+ - 10 - soccer
+
 Thursday:
  (no events)
+
 Friday:
  (no events)
+
 Saturday:
- (no events)
+ - 10 - dance
+
